@@ -1,11 +1,11 @@
-import requests
 import re
+import requests
 
 
 endpoints = {
     'youtube': {
         'scheme': 'http*://*.youtube.com/watch*',
-        'endpoint': 'http://www.youtube.com/oembed/',
+        'endpoint': 'http://www.youtube.com/oembed',
         'example': 'https://www.youtube.com/watch?v=F2ZCQfSNMuM'
     },
     'twitter': {
@@ -15,7 +15,7 @@ endpoints = {
     },
     'vimeo': {
         'scheme': 'http*://vimeo.com/*',
-        'endpoint': 'http://vimeo.com/api/oembed.json/',
+        'endpoint': 'http://vimeo.com/api/oembed.json',
         'example': 'https://vimeo.com/12676288'
     },
     'gist': {
@@ -25,20 +25,19 @@ endpoints = {
     },
     'soundcloud': {
         'scheme': 'http*://soundcloud.com/*',
-        'endpoint': 'http://soundcloud.com/oembed/',
+        'endpoint': 'http://soundcloud.com/oembed',
         'example': 'https://soundcloud.com/andrewbird/04-give-it-away'
     }
 }
 
 
 def get_embed_endpoint(url):
-    '''
-    Get oembed endpoint for a url
-    '''
+    """Get oembed endpoint for a url."""
 
     for key, values in endpoints.iteritems():
-        #print values['scheme']
-        re_values = str(values['scheme']).replace('.', '\.').replace('*', '.*?')
+
+        re_values = str(
+            values['scheme']).replace('.', '\.').replace('*', '.*?')
         values['scheme'] = re.compile(re_values)
 
         if values['scheme'].match(url):
@@ -46,9 +45,7 @@ def get_embed_endpoint(url):
 
 
 def get_oembed(url, endpoint, width=480):
-    '''
-    Make oembed request to provider
-    '''
+    """Make oembed request to provider."""
 
     params = {
         'url': url,
@@ -58,6 +55,8 @@ def get_oembed(url, endpoint, width=480):
     response = requests.get(endpoint, params=params)
     if response.status_code == requests.codes.ok:
         return response.json()
+    else:
+        return False
 
 
 def get_gist(url, endpoint):
@@ -65,10 +64,9 @@ def get_gist(url, endpoint):
 
 
 def get_embed(url):
-    '''
-    Route url to proper embed method
-    '''
+    """Route url to proper embed method."""
 
+    route = None
     endpoint = get_embed_endpoint(url)
     if endpoint == endpoints['gist']['endpoint']:
         route = get_gist(url, endpoint)
@@ -78,12 +76,10 @@ def get_embed(url):
 
 
 def get_embed_html(url):
-    '''
-    Return html from embed request
-    '''
+    """Return html from embed request."""
 
     response = get_embed(url)
-    # print response['html']
+    # print response
     return response['html'].encode('utf-8') if response else url
 
 
