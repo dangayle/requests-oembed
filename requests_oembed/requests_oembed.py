@@ -31,7 +31,7 @@ endpoints = {
 }
 
 
-def get_embed_endpoint(url):
+def get_endpoint(url):
     """Get oembed endpoint for a url."""
 
     for key, values in endpoints.iteritems():
@@ -44,49 +44,42 @@ def get_embed_endpoint(url):
             return values['endpoint']
 
 
-def get_oembed(url, endpoint, width=480):
+def get_oembed(url, endpoint, width=480, format="json"):
     """Make oembed request to provider."""
 
     params = {
         'url': url,
         'width': width,
-        'format': 'json'
+        'format': format
     }
     response = requests.get(endpoint, params=params)
     if response.status_code == requests.codes.ok:
         return response.json()
     else:
-        return False
+        return None
 
 
-def get_gist(url, endpoint):
+def gist(url, endpoint):
     return {'html': endpoint.format(url)}
 
 
-def get_embed(url):
+def route(url):
     """Route url to proper embed method."""
 
     route = None
-    endpoint = get_embed_endpoint(url)
-    if endpoint == endpoints['gist']['endpoint']:
-        route = get_gist(url, endpoint)
+    e = get_endpoint(url)
+    if e == endpoints['gist']['endpoint']:
+        route = gist(url, e)
     else:
-        route = get_oembed(url, endpoint)
+        route = get_oembed(url, e)
     return route
 
 
-def get_embed_html(url):
+def oembed(url):
     """Return html from embed request."""
 
-    response = get_embed(url)
-    # print response
+    response = route(url)
     return response['html'].encode('utf-8') if response else url
 
 
-def test_embed(endpoints):
-    for service in endpoints:
-        print(get_embed_html(endpoints[service]['example']))
 
-
-if __name__ == "__main__":
-    test_embed(endpoints)
